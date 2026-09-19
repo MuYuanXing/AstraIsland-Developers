@@ -1,4 +1,4 @@
-# 星河岛接入指南（接入库1.0.0，通信版本5）
+# 星河岛接入指南（接入库1.1.0，通信版本5）
 
 将应用内容显示到星河岛。完整配置见[从零示例](GETTING_STARTED.md)，字段与结果码见[协议规范](PROTOCOL.md)，运行要求见[支持范围](COMPATIBILITY.md)。
 
@@ -16,7 +16,7 @@
 
 ### AAR依赖
 
-从公开开发者仓库的 `sdk/` 取得 `astraisland-client-1.0.0.aar`，核对校验值，将它复制到自己应用的 `app/libs/astraisland-client.aar`。无需星河岛App源码。
+从公开开发者仓库的 `sdk/` 取得 `astraisland-client-1.1.0.aar`，核对校验值，将它复制到自己应用的 `app/libs/astraisland-client.aar`。无需星河岛App源码。
 
 ```kotlin
 dependencies {
@@ -230,7 +230,7 @@ island.end("download-42", ActivityBundle.encodeOutro(success = true, text = "下
 
 ## 十二、版本
 
-接入库1.0.0使用通信版本5。`island.islandProtocolVersion` 可查询宿主通信版本。后续破坏兼容的变更会升版并提供迁移说明。
+接入库1.1.0使用通信版本5。`island.islandProtocolVersion` 可查询宿主通信版本。后续破坏兼容的变更会升版并提供迁移说明。
 
 
 ## 自绘卡片（协议版本5）
@@ -242,3 +242,9 @@ island.end("download-42", ActivityBundle.encodeOutro(success = true, text = "下
 点击返回既有 `onAction`。收到动作后由来源重新绘图并以同一内容项id调用 `start` 更新。从零示例中的 `showCustomExample()` 提供完整绘图与区域声明，示例“显示自绘卡片”按钮可投送，图内“结束展示”交给来源结束。此过程不执行来源代码于系统界面内。
 
 来源负责图片中文字的大字版本和内容说明。点击区域在实际展示尺寸下须足够大；小于标准点击范围时，相同操作会放到图片下方的具名按钮。`REDACTED` 锁屏会清掉自绘图与区域，`PRIVATE` 完全隐藏。完整规则见 [协议说明](PROTOCOL.md) 第七节。
+
+## 星流内置宿主
+
+星流安装包可直接提供完整岛服务，不要求另装星河岛。接入库1.1.0起同时发现独立星河岛与带 `com.astraisland.HOST_PROTOCOL` 元信息的星流正式／调试包，并由库清单合并三个宿主对应的投送权限和包查询。系统界面中按实际运行状态只保留一个岛服务，普通通信字段和版本5保持不变。
+
+旧接入库1.0.0只查找独立星河岛；要支持只装星流的设备，请使用接入库1.1.0及以上。星流权限定义使用自身包名，避免两款应用安装时争用同名权限。

@@ -26,6 +26,6 @@ android {
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 dependencies {
-    implementation(files("../../sdk/astraisland-client-1.0.0.aar"))
+    implementation(files("../../sdk/astraisland-client-1.1.0.aar"))
     implementation("androidx.core:core-ktx:1.17.0")
 }

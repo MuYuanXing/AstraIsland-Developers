@@ -1,10 +1,10 @@
-# 从零接入示例（接入包1.0.0）
+# 从零接入示例（接入包1.1.0）
 
 本页提供一个可独立编译的接入示例。字段说明见[协议规范](PROTOCOL.md)，运行要求见[支持范围](COMPATIBILITY.md)。
 
 ## 准备
 
-1. 从公开开发者仓库的 `sdk/` 下载 `astraisland-client-1.0.0.aar`，核对 `SHA256SUMS`。
+1. 从公开开发者仓库的 `sdk/` 下载 `astraisland-client-1.1.0.aar`，核对 `SHA256SUMS`。
 2. 将接入库复制到新工程的 `app/libs/astraisland-client.aar`。
 3. 新工程使用JDK 17、Gradle 8.12和安卓编译平台36。
 4. 在 `local.properties` 中设置自己的 `sdk.dir`。

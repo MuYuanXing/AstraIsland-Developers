@@ -197,5 +197,19 @@
     "top",
     "right",
     "bottom"
-  ]
+  ],
+  "hostDiscovery": {
+    "metadataKey": "com.astraisland.HOST_PROTOCOL",
+    "packages": [
+      "com.astraflow.tool",
+      "com.astraflow.tool.debug",
+      "com.astraisland"
+    ],
+    "publishPermissions": [
+      "com.astraflow.tool.island.permission.PUBLISH_ACTIVITY",
+      "com.astraflow.tool.debug.island.permission.PUBLISH_ACTIVITY",
+      "com.astraisland.permission.PUBLISH_ACTIVITY"
+    ],
+    "legacyStandalonePackage": "com.astraisland"
+  }
 }

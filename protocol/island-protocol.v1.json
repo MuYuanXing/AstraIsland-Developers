@@ -1,0 +1,201 @@
+{
+  "manifestFormat": 1,
+  "description": "星河岛活动协议清单:Bundle 键名、槽位类型、模板、事件、结果码、配额上限。manifestFormat 是本文件的格式版本;protocolVersion 才是协议版本。",
+  "protocolVersion": 5,
+  "callbacksOneway": true,
+  "deliveryPolicy": {
+    "callbackWorkers": 4,
+    "queuedCallbacksPerSession": 32,
+    "callbackTimeoutMs": 2000,
+    "offerValidityMs": 5000
+  },
+  "actions": {
+    "register": "com.astraisland.action.REGISTER",
+    "islandReady": "com.astraisland.action.ISLAND_READY",
+    "permission": "com.astraisland.permission.PUBLISH_ACTIVITY"
+  },
+  "registerExtras": [
+    "client",
+    "source",
+    "protocolVersion"
+  ],
+  "sessionMethods": [
+    "bind",
+    "start",
+    "update",
+    "end",
+    "endAll",
+    "listMine",
+    "getProtocolVersion"
+  ],
+  "bundleKeys": [
+    "id",
+    "kind",
+    "priority",
+    "exclusive",
+    "staleAtWallMs",
+    "dismissAfterMs",
+    "alertOnUpdate",
+    "alertOnStart",
+    "accentColor",
+    "openIntent",
+    "hideWhenSourceForeground",
+    "compactLeading",
+    "compactTrailing",
+    "compactLabel",
+    "minimal",
+    "expanded",
+    "lockScreenVisibility",
+    "contentDescription"
+  ],
+  "slotKeys": [
+    "type",
+    "icon",
+    "text",
+    "color",
+    "mono",
+    "fraction",
+    "active",
+    "rounded",
+    "wallMs",
+    "scrollable"
+  ],
+  "slotTypes": [
+    "empty",
+    "icon",
+    "text",
+    "image",
+    "ring",
+    "waveform",
+    "countdown",
+    "chronometer"
+  ],
+  "iconKeys": [
+    "type",
+    "builtin",
+    "package",
+    "platform",
+    "bitmap"
+  ],
+  "iconTypes": [
+    "builtin",
+    "app",
+    "platform",
+    "bitmap"
+  ],
+  "expandedKeys": [
+    "template",
+    "title",
+    "subtitle",
+    "body",
+    "hero",
+    "progress",
+    "countdownWallMs",
+    "chronometerWallMs",
+    "lyricsLine",
+    "actions",
+    "playing",
+    "durationMs",
+    "positionMs",
+    "positionAtWallMs",
+    "speed",
+    "customRegions"
+  ],
+  "progressKeys": [
+    "fraction",
+    "indeterminate",
+    "segments",
+    "points",
+    "startLabel",
+    "endLabel"
+  ],
+  "templates": [
+    "GENERIC",
+    "MESSAGE",
+    "TIMER",
+    "PROGRESS",
+    "STATUS",
+    "MEDIA",
+    "CALL",
+    "HERO",
+    "CUSTOM"
+  ],
+  "actionKeys": [
+    "id",
+    "label",
+    "icon",
+    "destructive",
+    "primary"
+  ],
+  "outroKeys": [
+    "success",
+    "text"
+  ],
+  "events": [
+    "onSessionReady",
+    "onSessionLost",
+    "onAction",
+    "onExpanded",
+    "onCollapsed",
+    "onDismissedByUser",
+    "onPromoted",
+    "onDemoted",
+    "onExpired",
+    "onEndedBySystem"
+  ],
+  "resultCodes": {
+    "OK": 0,
+    "NO_PERMISSION": 1,
+    "SOURCE_DISABLED": 2,
+    "KIND_DISABLED": 3,
+    "QUOTA_EXCEEDED": 4,
+    "RATE_LIMITED": 5,
+    "ICON_REJECTED": 6,
+    "INVALID": 7,
+    "BUSY": 8,
+    "NOT_CONNECTED": 9,
+    "CUSTOM_REJECTED": 10
+  },
+  "limits": {
+    "maxTextBytes": 8192,
+    "maxConcurrentActivitiesPerSource": 3,
+    "maxUpdatesPerSecondPerSource": 10,
+    "updateCoalesceMs": 250,
+    "externalAlertCooldownMs": 10000,
+    "maxIdChars": 128,
+    "maxTitleChars": 128,
+    "maxSubtitleChars": 256,
+    "maxBodyChars": 4096,
+    "maxLyricsChars": 512,
+    "maxActionLabelChars": 32,
+    "maxCompactTextChars": 512,
+    "maxContentDescriptionChars": 256,
+    "maxActionsPerActivity": 3,
+    "maxBitmapEdgePx": 2048,
+    "maxBitmapBytes": 8388608,
+    "maxTitleLines": 1,
+    "maxSubtitleLines": 1,
+    "maxBodyLinesMessage": 2,
+    "outroDurationMs": 1600,
+    "maxLifetimeMs": 28800000,
+    "maxCustomRegions": 3
+  },
+  "externalPriorityCap": 80,
+  "externalAllowedKinds": [
+    "CUSTOM",
+    "LIVE_UPDATE",
+    "MEDIA",
+    "MESSAGE",
+    "TIMER"
+  ],
+  "externalForbiddenTemplates": [
+    "CALL"
+  ],
+  "customRegionKeys": [
+    "actionId",
+    "left",
+    "top",
+    "right",
+    "bottom"
+  ]
+}

@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="com.astraisland.permission.PUBLISH_ACTIVITY" />
     <queries>
+        <package android:name="com.astraflow.tool" />
         <package android:name="com.astraisland" />
     </queries>
     <application

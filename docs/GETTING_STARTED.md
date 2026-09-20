@@ -82,6 +82,7 @@ AAR文件本身不携带依赖仓库描述，因此上面明确声明了它需�
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="com.astraisland.permission.PUBLISH_ACTIVITY" />
     <queries>
+        <package android:name="com.astraflow.tool" />
         <package android:name="com.astraisland" />
     </queries>
     <application
@@ -99,7 +100,7 @@ AAR文件本身不携带依赖仓库描述，因此上面明确声明了它需�
 </manifest>
 ```
 
-显式查询项让包发现意图清楚，不替代接入权限。宿主未安装时客户端状态为 `NOT_INSTALLED`，调用 `start` 返回 `RESULT_NOT_CONNECTED`。
+显式查询项让包发现意图清楚（星流为宿主包名，`com.astraisland` 兼容旧版独立星河岛），不替代接入权限。宿主未安装时客户端状态为 `NOT_INSTALLED`，调用 `start` 返回 `RESULT_NOT_CONNECTED`。
 
 <!-- consumer:app/src/main/java/com/example/islandcheck/DemoApplication.kt -->
 ```kotlin

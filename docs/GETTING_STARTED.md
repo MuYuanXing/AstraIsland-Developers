@@ -1,10 +1,10 @@
-# 从零接入示例（接入包1.1.0）
+# 从零接入示例（接入包1.2.0）
 
 本页提供一个可独立编译的接入示例。字段说明见[协议规范](PROTOCOL.md)，运行要求见[支持范围](COMPATIBILITY.md)。
 
 ## 准备
 
-1. 从公开开发者仓库的 `sdk/` 下载 `astraisland-client-1.1.0.aar`，核对 `SHA256SUMS`。
+1. 从公开开发者仓库的 `sdk/` 下载 `astraisland-client-1.2.0.aar`，核对 `SHA256SUMS`。
 2. 将接入库复制到新工程的 `app/libs/astraisland-client.aar`。
 3. 新工程使用JDK 17、Gradle 8.12和安卓编译平台36。
 4. 在 `local.properties` 中设置自己的 `sdk.dir`。
@@ -83,7 +83,6 @@ AAR文件本身不携带依赖仓库描述，因此上面明确声明了它需�
     <uses-permission android:name="com.astraisland.permission.PUBLISH_ACTIVITY" />
     <queries>
         <package android:name="com.astraflow.tool" />
-        <package android:name="com.astraisland" />
     </queries>
     <application
         android:name=".DemoApplication"
@@ -100,7 +99,7 @@ AAR文件本身不携带依赖仓库描述，因此上面明确声明了它需�
 </manifest>
 ```
 
-显式查询项让包发现意图清楚（星流为宿主包名，`com.astraisland` 兼容旧版独立星河岛），不替代接入权限。宿主未安装时客户端状态为 `NOT_INSTALLED`，调用 `start` 返回 `RESULT_NOT_CONNECTED`。
+显式查询项让包发现意图清楚（星流为宿主包名），不替代接入权限。宿主未安装时客户端状态为 `NOT_INSTALLED`，调用 `start` 返回 `RESULT_NOT_CONNECTED`。
 
 <!-- consumer:app/src/main/java/com/example/islandcheck/DemoApplication.kt -->
 ```kotlin

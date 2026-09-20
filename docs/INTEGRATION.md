@@ -1,4 +1,4 @@
-# 星河岛接入指南（接入库1.1.0，通信版本5）
+# 星河岛接入指南（接入库1.2.0，通信版本5）
 
 将应用内容显示到星河岛。完整配置见[从零示例](GETTING_STARTED.md)，字段与结果码见[协议规范](PROTOCOL.md)，运行要求见[支持范围](COMPATIBILITY.md)。
 
@@ -16,7 +16,7 @@
 
 ### AAR依赖
 
-从公开开发者仓库的 `sdk/` 取得 `astraisland-client-1.1.0.aar`，核对校验值，将它复制到自己应用的 `app/libs/astraisland-client.aar`。无需星河岛App源码。
+从公开开发者仓库的 `sdk/` 取得 `astraisland-client-1.2.0.aar`，核对校验值，将它复制到自己应用的 `app/libs/astraisland-client.aar`。无需星河岛App源码。
 
 ```kotlin
 dependencies {
@@ -35,7 +35,7 @@ dependencies {
 
 这个权限由宿主安装包定义，普通级别，不弹授权框。声明了就能投送；用户事后可以在星河岛的「来源管理」里关掉你。客户端未发现宿主时进入 `NOT_INSTALLED`；没有连接的 `start` 返回 `RESULT_NOT_CONNECTED`（9）。权限未获授予才对应 `RESULT_NO_PERMISSION`（1）。
 
-在清单的 `application` 中登记示例应用类：`android:name=".MyApp"`。可同时在 `queries` 声明宿主包名（星流为 `com.astraflow.tool`，`com.astraisland` 兼容旧版独立星河岛），明确包发现意图；这不替代接入权限。完整清单见从零接入示例。
+在清单的 `application` 中登记示例应用类：`android:name=".MyApp"`。可同时在 `queries` 声明宿主包名（星流为 `com.astraflow.tool`），明确包发现意图；这不替代接入权限。完整清单见从零接入示例。
 
 ## 四、连上岛
 
@@ -67,7 +67,7 @@ class MyApp : Application() {
 }
 ```
 
-`connect()` 先用 PackageManager 查本机有没有可用宿主（带星河岛能力的星流，或已安装的旧版独立星河岛），没有就直接 `state = NOT_INSTALLED` 并回调 `onReadyChanged(false)`。有的话发一条定向广播给系统界面进程，岛回你一个会话并附带岛的协议版本（`island.islandProtocolVersion`），客户端库自动调 `bind()` 让岛核对身份，通过后 `state = READY`、`onReadyChanged(true)`。3 秒内没成功会回调 `onReadyChanged(false)`，此时看 `state` 分辨原因。
+`connect()` 先用 PackageManager 查本机有没有可用宿主（带星河岛能力的星流），没有就直接 `state = NOT_INSTALLED` 并回调 `onReadyChanged(false)`。有的话发一条定向广播给系统界面进程，岛回你一个会话并附带岛的协议版本（`island.islandProtocolVersion`），客户端库自动调 `bind()` 让岛核对身份，通过后 `state = READY`、`onReadyChanged(true)`。3 秒内没成功会回调 `onReadyChanged(false)`，此时看 `state` 分辨原因。
 
 岛重启（系统界面重启）时客户端库通过死亡监听立刻回调 `onReadyChanged(false)`，岛起来后广播「岛就绪」，客户端库自动重新注册，你不用管。重连后用 `island.listMine()` 核对哪些内容项仍登记在岛中，再决定补投什么。
 
@@ -222,7 +222,7 @@ island.end("download-42", ActivityBundle.encodeOutro(success = true, text = "下
 ## 十一、常见问题
 
 - **`onReadyChanged(false)`，`state` 是 `NOT_INSTALLED`**：本机没装星河岛。
-- **`state` 停在 `WAITING`**：模块没在 LSPosed 里启用，或系统界面还没启动完。先看星河岛 App 首页的「模块状态」。
+- **`state` 停在 `WAITING`**：模块没在 LSPosed 里启用，或系统界面还没启动完。先在模块管理器中确认星流已启用并已勾选系统界面。
 - **`state` 是 `REJECTED`**：你注册时报的包名与你的 uid 不符（多进程共享 uid 的情况请用主包名）。
 - **`start` 返回非 0**：按第九节的表处理，不用猜。
 - **卡片自动收起了**：普通卡片默认5秒无操作收起；按住或输入时另行保持，当前没有通用收起时长设置。想让用户主动看，别设 `alertOnStart`，用户点胶囊自己展开。
@@ -230,7 +230,7 @@ island.end("download-42", ActivityBundle.encodeOutro(success = true, text = "下
 
 ## 十二、版本
 
-接入库1.1.0使用通信版本5。`island.islandProtocolVersion` 可查询宿主通信版本。后续破坏兼容的变更会升版并提供迁移说明。
+接入库1.2.0使用通信版本5。`island.islandProtocolVersion` 可查询宿主通信版本。后续破坏兼容的变更会升版并提供迁移说明。
 
 
 ## 自绘卡片（协议版本5）
@@ -245,6 +245,6 @@ island.end("download-42", ActivityBundle.encodeOutro(success = true, text = "下
 
 ## 星流内置宿主
 
-星河岛能力由星流安装包完整提供，独立星河岛应用已停止发布。接入库1.1.0起发现带 `com.astraisland.HOST_PROTOCOL` 元信息的星流正式／调试包，并兼容已安装的旧版独立星河岛，由库清单合并各宿主对应的投送权限和包查询。系统界面中按实际运行状态只保留一个岛服务，普通通信字段和版本5保持不变。
+星河岛能力由星流安装包完整提供，独立星河岛应用已停止发布。接入库1.2.0起只发现带 `com.astraisland.HOST_PROTOCOL` 元信息的星流正式／调试包，不再接受独立星河岛作为宿主，由库清单合并宿主对应的投送权限和包查询。系统界面中按实际运行状态只保留一个岛服务，普通通信字段和版本5保持不变。
 
-旧接入库1.0.0只查找独立星河岛；请使用接入库1.1.0及以上。星流权限定义使用自身包名，避免两款应用安装时争用同名权限。
+旧接入库1.1.x同时发现独立星河岛与星流，1.0.0只查找独立星河岛；请统一升级到1.2.0及以上，并引导仅安装旧版独立岛的用户改装星流。星流权限定义使用自身包名，避免两款应用安装时争用同名权限。

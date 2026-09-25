@@ -1,6 +1,6 @@
 {
-  "sdkVersion": "1.2.0",
-  "protocolVersion": 5,
+  "sdkVersion": "1.3.0",
+  "protocolVersion": 6,
   "host": "astraflow",
   "license": "PolyForm-Noncommercial-1.0.0"
 }

@@ -2,30 +2,30 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
 android {
-    namespace = "com.example.islandcheck"
+    namespace = "com.example.islandsample"
     compileSdk = 36
+
     defaultConfig {
-        applicationId = "com.example.islandcheck"
+        applicationId = "com.example.islandsample"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-        }
-    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
-kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
+
 dependencies {
-    implementation(files("../../sdk/astraisland-client-1.3.0.aar"))
-    implementation("androidx.core:core-ktx:1.17.0")
+    // 星河岛 SDK：将 astraisland-sdk-0.1.0.aar 放入 app/libs 目录。
+    implementation(files("libs/astraisland-sdk-0.1.0.aar"))
 }

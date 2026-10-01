@@ -1,33 +1,46 @@
-# 星河岛开发者接入
+# 星河岛 SDK
 
-接入库 **1.3.0**（通信版本 6），支持消息、进度、计时、音乐、状态、大图和自绘卡片，消息卡片可带回复输入条、音乐卡片进度条可拖；星河岛能力由星流安装包完整提供，独立星河岛应用已停止发布。
+星河岛在手机前置摄像头周围显示进行中的事项。应用通过星河岛 SDK 提供内容，排版、动效与显示规则由星河岛统一完成。
 
-采用 [PolyForm Noncommercial 1.0.0](LICENSE.md)：禁止商用，允许闭源接入、修改和分发。分发时保留许可与版权声明。
+当前版本 **0.1.0**（公开测试，通信版本 7）。完整的产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
+
+## 使用条件
+
+| 项目 | 要求 |
+| --- | --- |
+| 接入应用 | Android 8.0（API 26）及以上；compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.0 及以上 |
+| 用户设备 | Android 15 及以上，已安装并启用支持通信版本 7 的星流 |
 
 ## 开始接入
 
-1. 安装带星河岛能力的星流（含 `com.astraisland.HOST_PROTOCOL` 元信息的正式／调试包），启用系统模块；同一安装包内含完整星河岛，无需另装。
-2. 下载 `sdk/astraisland-client-1.3.0.aar`，使用 `SHA256SUMS` 校验。
-3. 按[从零示例](docs/GETTING_STARTED.md)配置项目。
-4. 查阅[接入指南](docs/INTEGRATION.md)、[协议说明](docs/PROTOCOL.md)与[支持范围](docs/COMPATIBILITY.md)。
+1. 下载 `sdk/astraisland-sdk-0.1.0.aar`（可用 `SHA256SUMS` 校验），放入应用模块的 `libs` 目录。
+2. 在应用模块的 `build.gradle.kts` 中加入：
 
-## 编译示例
+   ```kotlin
+   dependencies {
+       implementation(files("libs/astraisland-sdk-0.1.0.aar"))
+   }
+   ```
 
-需要JDK 17和安卓SDK。在 `sample/local.properties` 配置 `sdk.dir`，然后执行：
+3. 按 [快速开始](https://astraflow.cc/island/develop-quickstart.html) 连接星河岛并显示第一条内容。全部接口见 [接口说明](docs/API.md)。
 
-```bash
-./gradlew -p sample :app:assembleDebug :app:assembleRelease
-```
+## 示例工程
 
-Windows使用 `gradlew.bat`。示例包含显示、更新、回复、拖动进度、路口提醒、自绘卡片和结束操作，正式构建启用代码混淆。
+`sample/` 是完整的 Android 示例工程，逐一演示九套卡片、各类按钮、收尾、回复、进度拖动、用户收起与结束回调，并附 Java 调用示例。在 `sample/local.properties` 中配置 `sdk.dir` 后，用 Android Studio 打开 `sample` 目录运行，或在仓库根目录执行 `./gradlew -p sample :app:assembleDebug`（Windows 使用 `gradlew.bat`）。
 
 ## 文件
 
 | 内容 | 位置 |
 | --- | --- |
-| 接入库 | `sdk/` |
-| 示例项目 | `sample/` |
-| 字段和限制 | `protocol/island-protocol.v1.json` |
-| 开发文档 | `docs/` |
+| 工具包 | `sdk/` |
+| 示例工程 | `sample/` |
+| 接口说明 | `docs/API.md` |
+| 更新日志 | `CHANGELOG.md` |
 
-问题反馈：[Issues](https://github.com/MuYuanXing/AstraIsland-Developers/issues)。请附设备、系统版本和复现步骤。
+## 许可
+
+星河岛 SDK、示例工程与开发文档依 [PolyForm Noncommercial License 1.0.0](LICENSE.md) 授权，仅限非商业用途使用；用于商业用途须另行取得授权。分发时须保留许可与版权声明，见 [NOTICE.md](NOTICE.md)。
+
+## 问题反馈
+
+请在 [Issues](https://github.com/MuYuanXing/AstraIsland-Developers/issues) 中提交，并附设备型号、系统版本与复现步骤。

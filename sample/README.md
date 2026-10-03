@@ -5,7 +5,7 @@
 ## 运行环境
 
 - Android Studio（Android Gradle 插件 8.9 及以上）、JDK 17。
-- 测试设备需安装星流（Android 15 及以上）并启用星河岛。
+- 测试设备需安装星流（Android 15 及以上）并启用星河岛；OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」。
 
 ## 使用方法
 

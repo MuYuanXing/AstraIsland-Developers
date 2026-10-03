@@ -12,7 +12,7 @@
 | 工具包文件 | `astraisland-sdk-0.1.0.aar` |
 | 公开接口所在包 | `com.astraisland.sdk` |
 | 接入应用最低系统版本 | Android 8.0（API 26） |
-| 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流 |
+| 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流。OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」，星河岛方可显示 |
 | 编译要求 | compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.0 及以上 |
 | 依赖 | 仅 Kotlin 标准库。Kotlin 工程已自带；纯 Java 工程需添加 `implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")` |
 | 混淆 | 无需额外混淆规则 |
@@ -96,7 +96,7 @@ class IslandClient(context: Context)
 | `State` 取值 | 含义 |
 |---|---|
 | `NOT_INSTALLED` | 未安装星流，或已安装的星流版本过低、不含星河岛 |
-| `WAITING` | 正在等待星河岛响应；连接后长时间停留在此状态，说明星河岛未启用或设备尚未就绪 |
+| `WAITING` | 正在等待星河岛响应；连接后长时间停留在此状态，说明星河岛未启用或设备尚未就绪（OPPO、一加、realme 手机上也可能是尚未启用插件「流体云事件接入」） |
 | `REJECTED` | 星河岛拒绝了连接（例如身份核对未通过） |
 | `READY` | 已连接，可以显示内容 |
 
@@ -126,7 +126,7 @@ enum class EndReason { EXPIRED, REMOVED }
 | `EndReason` 取值 | 含义 |
 |---|---|
 | `EXPIRED` | 到达自动消失时间，或显示满 8 小时 |
-| `REMOVED` | 用户在星流中关闭了本应用或这一类内容，或星河岛停止运行 |
+| `REMOVED` | 用户在星流中关闭了本应用的内容或音乐内容，或星河岛停止运行 |
 
 ### 4.3 IslandResult
 
@@ -140,7 +140,7 @@ enum class IslandResult { OK, IMAGE_REJECTED, NO_PERMISSION, SOURCE_DISABLED, KI
 | `IMAGE_REJECTED` | 已受理，但有图片不符合要求而未显示，其余内容照常显示 |
 | `NO_PERMISSION` | 没有投送权限：清单中缺少 SDK 自带的权限声明 |
 | `SOURCE_DISABLED` | 用户在星流中关闭了本应用的内容 |
-| `KIND_DISABLED` | 用户在星流中关闭了这一类内容（计时、实时活动、音乐或消息） |
+| `KIND_DISABLED` | 用户在星流中关闭了「音乐与歌词」，音乐卡片不予显示 |
 | `QUOTA_EXCEEDED` | 本应用同时显示的内容已达 3 条，请先结束旧内容 |
 | `RATE_LIMITED` | 提交过于频繁（每秒超过 10 次），本次未受理 |
 | `INVALID` | 内容无效（例如数值不是有限数），或连接尚未就绪；原有内容保持不变 |
@@ -547,8 +547,8 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 
 - **前台**：本应用在前台时，它的内容不在主岛和副岛上显示，离开应用后立即恢复。
 - **排位**：外部应用的内容最高与未到点的计时同档，排在来电、通话、刚到的新消息和导航之后。消息卡片按新消息排位，刚送达时优先显示在主岛，停留一段时间后让位。
-- **内容种类**：用户可在星流中按类别关闭内容。音乐卡片属于「音乐」，消息卡片属于「消息」，强调卡片中的计时属于「计时」，其余卡片属于「实时活动」。
-- **来源管理**：用户可在星流中关闭某个应用的内容；关闭后提交返回 `SOURCE_DISABLED`，已显示的内容被结束（`onEnded` 原因为 `REMOVED`）。
+- **内容种类**：音乐卡片属于「音乐」，消息卡片属于「消息」，强调卡片中的计时属于「计时」，其余卡片属于「实时活动」。用户在星流中关闭「音乐与歌词」后，音乐卡片的提交返回 `KIND_DISABLED`；其余种类不受星流的内容开关影响，只由「外部应用」页按应用管理。
+- **外部应用**：用户可在星流「外部应用」页关闭某个应用的内容；关闭后提交返回 `SOURCE_DISABLED`，已显示的内容被结束（`onEnded` 原因为 `REMOVED`）。
 - **收起与召回**：用户在胶囊上划动可把内容从星河岛上收起，应用收到 `onDismissed`，内容仍然保留，见 4.2。
 - **锁屏**：见 `LockScreenVisibility`。
 - **自己的通知**：见 `setOwnNotification`。

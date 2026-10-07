@@ -531,6 +531,7 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 | 对称下方小字 | 128 个字符 |
 | 读屏说明 | 256 个字符 |
 | 收尾文字 | 128 个字符 |
+| 回复输入 | 2000 个字符，输入区域最多显示三行 |
 | 一条内容全部文字合计 | 8192 字节（UTF-8） |
 | 明细 | 1 至 6 格 |
 | 阶段名 | 2 至 16 个 |
@@ -588,7 +589,7 @@ fun showDownload(client: IslandClient, percent: Int): IslandResult {
 }
 ```
 
-### 7.2 可回复的消息
+### 7.2 消息、短信回复与标为已读
 
 ```kotlin
 fun showMessage(client: IslandClient, avatar: Bitmap, notificationId: Int): IslandResult {
@@ -610,15 +611,48 @@ fun showMessage(client: IslandClient, avatar: Bitmap, notificationId: Int): Isla
 }
 ```
 
-回复内容通过回调取得：
+短信和即时消息均使用 `MessageCard`，无需另找短信模板。回复默认关闭，调用 `setReplyEnabled(true)` 开启后由星河岛显示回复输入条与发送键。「标为已读」是应用自定义的普通文字按钮，`mark_read` 是此示例的编号，不是系统保留编号。
+
+回复内容通过回调取得；在原有 `IslandCallback` 中同时处理回复与已读操作，不要再次设置回调覆盖连接状态处理：
 
 ```kotlin
-client.setCallback(object : IslandCallback() {
-    override fun onReply(activityId: String, text: String) {
-        // 由应用发送 text，发送后可用同一内容编号更新卡片
-    }
-})
+override fun onReply(activityId: String, text: String) {
+    if (activityId != "chat-xiaoming") return
+    // 在应用自己的后台任务中发送 text，目标为该编号对应的会话。
+    // 根据实际发送结果更新会话与卡片；此回调本身不代表发送成功。
+}
+
+override fun onAction(activityId: String, actionId: String) {
+    if (activityId != "chat-xiaoming" || actionId != "mark_read") return
+    // 在应用中将对应会话标为已读，业务处理完成后更新或结束此内容。
+    // client.update(...) 或 client.end(activityId) 必须在后台线程调用。
+}
 ```
+
+#### 回复界面与状态
+
+| 状态 | 界面与处理 |
+|---|---|
+| 未输入 | 显示「回复 收件人」输入入口；仅有一个「标为已读」按钮时，两者并排 |
+| 输入中 | 发送键位于输入条右端；「取消」与应用按钮排列在下方，不移除已读操作 |
+| 正在提交 | 显示提交状态，避免重复提交；输入或提交期间不被新消息替换 |
+| 已交给应用 | 显示「已交给应用发送」；实际发送及送达状态仍由应用确认 |
+| 未能交给应用 | 显示「发送未完成，文字已保留。」；草稿保留，允许继续处理 |
+| 锁屏 | 不显示回复输入条；需隐藏已读操作时，为按钮设置 `requiresUnlock = true` |
+
+回复文字最多 2000 个字符，输入区域最多显示三行。空白内容不能发送。取消输入会退出编辑，未提交文字仍保留为草稿。
+
+以下为使用当前星河岛代码生成的示例图，联系人与消息内容均为虚构，不是手机截图；具体应用仅在提供相应操作时显示回复与已读按钮。
+
+![消息模板：回复入口与标为已读](images/message-reply.webp)
+
+![输入回复：发送、取消与标为已读](images/message-editing.webp)
+
+![文字提交后的提示](images/message-submitted.webp)
+
+图片素材来源与许可见 [配图说明](images/README.md)。
+
+示例工程只展示卡片与操作回传，不发送真实短信或聊天消息。接入应用必须自行实现发送、会话已读与发送结果处理；星河岛不提供替代短信权限或聊天服务的能力。
 
 ### 7.3 倒计时
 

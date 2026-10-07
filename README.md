@@ -4,7 +4,7 @@
 
 当前版本 **0.1.1**（公开测试，通信版本 7）。完整的产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
 
-文档最近修订：2026-10-07。工具包版本与文档修订分别记录，详见 [更新日志](CHANGELOG.md)。
+文档最近修订：2026-10-08。工具包版本与文档修订分别记录，详见 [更新日志](CHANGELOG.md)。
 
 ## 使用条件
 
@@ -25,6 +25,10 @@
    ```
 
 3. 按 [快速开始](https://astraflow.cc/island/develop-quickstart.html) 连接星河岛并显示第一条内容。全部接口见 [接口说明](docs/API.md)。
+
+## 消息、短信与快捷回复
+
+消息与短信使用同一套消息模板，可提供回复输入条、发送键与「标为已读」按钮。查看 [完整接入说明与状态配图](docs/API.md#72-消息短信回复与标为已读)，或打开网站的 [消息模板](https://astraflow.cc/island/develop-templates.html#message) 与 [回复、发送和已读操作](https://astraflow.cc/island/develop-interaction.html#reply)。实际发送和会话已读由接入应用完成。
 
 ## 示例工程
 

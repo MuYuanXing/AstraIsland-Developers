@@ -13,7 +13,7 @@
 | 公开接口所在包 | `com.astraisland.sdk` |
 | 接入应用最低系统版本 | Android 8.0（API 26） |
 | 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流。OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」，星河岛方可显示 |
-| 编译要求 | compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.0 及以上 |
+| 编译要求 | compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.1 及以上 |
 | 依赖 | 仅 Kotlin 标准库。Kotlin 工程已自带；纯 Java 工程需添加 `implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")` |
 | 混淆 | 无需额外混淆规则 |
 
@@ -165,11 +165,11 @@ class IslandActivity.Builder(id: String, capsule: Capsule, card: IslandCard)
 | `setAlertOnUpdate(alert: Boolean)` | `false` | 更新（且内容有变化）时自动展开卡片片刻。同一应用 10 秒内最多自动展开一次；连续更新显示最新内容，期间提出的展开要求保留一次 |
 | `setLockScreenVisibility(visibility: LockScreenVisibility)` | `PUBLIC` | 锁屏时显示多少 |
 | `setOpenIntent(intent: PendingIntent?)` | `null` | 点击卡片时执行的操作 |
-| `setOwnNotification(id: Int, tag: String? = null)` | 未设置 | 说明这条内容对应本应用自己的哪一条通知（`NotificationManager.notify` 的编号与标签）。这条内容在星河岛上时，那条通知不再单独显示在星河岛上；内容显示在主岛或副岛上时，那条通知也不再弹出横幅 |
+| `setOwnNotification(id: Int, tag: String? = null)` | 未设置 | 说明这条内容对应本应用自己的哪一条通知（`NotificationManager.notify` 的编号与标签）。这条内容在星河岛上时，那条通知不再单独显示在星河岛上；内容显示在主岛或副岛上，且用户开启「屏蔽系统横幅」时，那条通知也不再弹出系统横幅。仅可关联星河岛所在用户中本应用自己的通知；内容结束后不重新显示旧通知，待通知下次更新时按通知规则处理 |
 | `setPostedAt(timeMillis: Long)` | 未设置 | 发送时间（`System.currentTimeMillis()` 口径，大于 0）。设置后卡片来源栏右侧显示「刚刚」「5 分钟前」或具体时刻；消息卡片以发送时间区分新消息 |
 | `setStaleAt(timeMillis: Long)` | 未设置 | 过时时间（大于 0）。过了这个时间卡片注明「信息可能已过时」，内容仍保留 |
 | `setDismissPolicy(policy: DismissPolicy)` | `untilEnded()` | 消失方式 |
-| `setLandscapeText(text: String?)` | `null` | 横屏时胶囊右侧放不下原文字时显示的短文字（竖排三行以内），最多 32 个字符；未设置时取标题开头几个字 |
+| `setLandscapeText(text: String?)` | `null` | 横屏胶囊的完整短文字，最多 32 个字符，数字与英文按组竖排后须在四行以内；未设置或无法完整显示时，星河岛保留完整数值或短状态，不截取卡片标题。消息显示应用名称；音乐优先显示波形；空白及非文字的右侧内容保持原有形式 |
 | `setAccentColor(color: Int?)` | `null` | 强调色（ARGB），用于进度条、主要按钮、放大的数值等；过暗的颜色会被提亮 |
 | `setContentDescription(text: String?)` | `null` | 无障碍读屏说明，最多 256 个字符 |
 | `build(): IslandActivity` | | 生成内容 |
@@ -443,7 +443,7 @@ sealed class IslandCard { abstract val title: String }
 
 左右两侧各写一个名称（可带标志与小字），中间放大显示两侧的比分，下方一行写比赛信息。尚无比分时，中间放大显示 `setCenterText` 设置的文字（例如「19:30 开赛」）。卡片不显示按钮。
 
-`MirrorCard.Builder(title: String, left: MirrorSide, right: MirrorSide)`：`title` 不单独显示在卡片上，用于无障碍读屏与横屏胶囊。
+`MirrorCard.Builder(title: String, left: MirrorSide, right: MirrorSide)`：`title` 不单独显示在卡片上，用于无障碍读屏。
 
 | 方法 | 说明 |
 |---|---|
@@ -556,7 +556,13 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 - **外部应用**：用户可在星流「外部应用」页关闭某个应用的内容；关闭后提交返回 `SOURCE_DISABLED`，已显示的内容被结束（`onEnded` 原因为 `REMOVED`）。
 - **收起与召回**：用户在胶囊上划动可把内容从星河岛上收起，应用收到 `onDismissed`，内容仍然保留，见 4.2。
 - **锁屏**：见 `LockScreenVisibility`。
-- **自己的通知**：见 `setOwnNotification`。
+- **自己的通知**：仅关联当前用户中本应用自己的通知；对应内容保留期间，该通知不单独上岛。只有内容显示在主岛或副岛且开启「屏蔽系统横幅」时才屏蔽横幅。内容结束后，通知下次更新时再按通知规则处理。
+- **横屏**：胶囊纵向显示，数字与英文按组排列，保留完整数值、单位或短状态，不截取卡片标题。应用可用 `setLandscapeText` 提供可在四行内完整显示的短文字；消息显示来源应用名称，音乐优先显示波形。空白、图像、计时与进度环不由该文字替换，胶囊最右端的附加图像或进度环在横屏隐藏。
+- **消息更新**：设置了 `setPostedAt` 时，发送时间变化才视为新消息；未设置时，发送人或消息正文变化才视为新消息。同一消息的按钮、图片等更新不重新计算「消息主岛停留时长」。
+- **音乐去重**：同一应用同时存在 SDK 音乐卡片与星河岛自行读取的音乐时，只显示 SDK 音乐卡片，另一份进入等待队列。SDK 音乐卡片的排位最高仍与未到点的计时同档。
+- **内容隔离**：SDK 内容与星河岛自行读取的通知、音乐分别管理；即使内容编号相同，也不会互相替换。应用只能更新、结束自己通过 SDK 提交的内容。
+- **文字长度**：SDK 按各字段上限检查文字，超长时抛出异常。星河岛接收端截短文字时保留完整字符与组合表情，不拆开肤色表情、国旗或组合表情。
+- **收尾显示**：收尾仅在原内容仍保留时出现，约 1.6 秒后消失；排位最高与未到点的计时同档，并遵守原内容的锁屏可见范围与内容开关。
 
 ## 7. 示例
 

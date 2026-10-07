@@ -1,15 +1,15 @@
-# 星河岛 SDK 0.1.0 接口说明
+# 星河岛 SDK 0.1.1 接口说明
 
-本文列出星河岛 SDK 0.1.0 的全部公开接口、取值范围、异常与回调，内容与工具包代码一致。
+本文列出星河岛 SDK 0.1.1 的全部公开接口、取值范围、异常与回调，内容与工具包代码一致。
 
 ## 1. 概述
 
 | 项目 | 内容 |
 |---|---|
 | 名称 | 星河岛 SDK |
-| 版本 | 0.1.0 |
+| 版本 | 0.1.1 |
 | 通信版本 | 7 |
-| 工具包文件 | `astraisland-sdk-0.1.0.aar` |
+| 工具包文件 | `astraisland-sdk-0.1.1.aar` |
 | 公开接口所在包 | `com.astraisland.sdk` |
 | 接入应用最低系统版本 | Android 8.0（API 26） |
 | 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流。OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」，星河岛方可显示 |
@@ -23,12 +23,12 @@
 
 ## 2. 接入步骤
 
-1. 将 `astraisland-sdk-0.1.0.aar` 放入应用模块的 `libs` 目录。
+1. 将 `astraisland-sdk-0.1.1.aar` 放入应用模块的 `libs` 目录。
 2. 在应用模块的 `build.gradle.kts` 中添加依赖：
 
 ```kotlin
 dependencies {
-    implementation(files("libs/astraisland-sdk-0.1.0.aar"))
+    implementation(files("libs/astraisland-sdk-0.1.1.aar"))
 }
 ```
 
@@ -90,12 +90,12 @@ class IslandClient(context: Context)
 | `fun end(id: String, outro: Outro? = null): IslandResult` | 结束一条内容，可带收尾 |
 | `fun endAll(): IslandResult` | 结束本应用在星河岛上的全部内容；未连接时返回 `NOT_CONNECTED` |
 | `fun listMine(): List<String>` | 本应用仍在星河岛上的内容编号（含暂未显示、排在后面的内容）；未连接时为空列表 |
-| `const val SDK_VERSION: String = "0.1.0"` | 伴生常量 |
+| `const val SDK_VERSION: String = "0.1.1"` | 伴生常量 |
 | `const val PROTOCOL_VERSION: Int = 7` | 伴生常量 |
 
 | `State` 取值 | 含义 |
 |---|---|
-| `NOT_INSTALLED` | 未安装星流，或已安装的星流版本过低、不含星河岛 |
+| `NOT_INSTALLED` | 未安装星流，或已安装的星流不支持当前通信版本 |
 | `WAITING` | 正在等待星河岛响应；连接后长时间停留在此状态，说明星河岛未启用或设备尚未就绪（OPPO、一加、realme 手机上也可能是尚未启用插件「流体云事件接入」） |
 | `REJECTED` | 星河岛拒绝了连接（例如身份核对未通过） |
 | `READY` | 已连接，可以显示内容 |
@@ -141,7 +141,7 @@ enum class IslandResult { OK, IMAGE_REJECTED, NO_PERMISSION, SOURCE_DISABLED, KI
 | `NO_PERMISSION` | 没有投送权限：清单中缺少 SDK 自带的权限声明 |
 | `SOURCE_DISABLED` | 用户在星流中关闭了本应用的内容 |
 | `KIND_DISABLED` | 用户在星流中关闭了「星河岛歌词」，音乐卡片不予显示 |
-| `QUOTA_EXCEEDED` | 本应用同时显示的内容已达 3 条，请先结束旧内容 |
+| `QUOTA_EXCEEDED` | 本应用通过 SDK 提交且尚未结束的内容已达 3 条，排队内容也计入；请先结束旧内容 |
 | `RATE_LIMITED` | 提交过于频繁（每秒超过 10 次），本次未受理 |
 | `INVALID` | 内容无效（例如数值不是有限数），或连接尚未就绪；原有内容保持不变 |
 | `BUSY` | 星河岛暂时繁忙，本次未处理，请稍后重试 |
@@ -162,7 +162,7 @@ class IslandActivity.Builder(id: String, capsule: Capsule, card: IslandCard)
 |---|---|---|
 | `setPriority(priority: Priority)` | `DEFAULT` | 排位参考。消息卡片不使用此项，按新消息排位 |
 | `setAlertOnStart(alert: Boolean)` | `false` | 首次显示时自动展开卡片片刻。同一应用 10 秒内最多自动展开一次 |
-| `setAlertOnUpdate(alert: Boolean)` | `false` | 更新（且内容有变化）时自动展开卡片片刻。同一应用 10 秒内最多自动展开一次 |
+| `setAlertOnUpdate(alert: Boolean)` | `false` | 更新（且内容有变化）时自动展开卡片片刻。同一应用 10 秒内最多自动展开一次；连续更新显示最新内容，期间提出的展开要求保留一次 |
 | `setLockScreenVisibility(visibility: LockScreenVisibility)` | `PUBLIC` | 锁屏时显示多少 |
 | `setOpenIntent(intent: PendingIntent?)` | `null` | 点击卡片时执行的操作 |
 | `setOwnNotification(id: Int, tag: String? = null)` | 未设置 | 说明这条内容对应本应用自己的哪一条通知（`NotificationManager.notify` 的编号与标签）。这条内容在星河岛上时，那条通知不再单独显示在星河岛上；内容显示在主岛或副岛上时，那条通知也不再弹出横幅 |
@@ -418,7 +418,7 @@ sealed class IslandCard { abstract val title: String }
 | `setPlaying(playing: Boolean)` | 是否正在播放：决定播放键的图形与进度是否走动。默认 `false` |
 | `setProgress(durationMillis: Long, positionMillis: Long, atMillis: Long = System.currentTimeMillis(), speed: Float = 1f)` | 播放进度：总时长大于 0；位置在 0 至总时长之间；`atMillis` 为取得位置的时刻（大于 0）；速度在 -16 至 16 之间 |
 | `setLyric(lyric: String?)` | 当前一句歌词，最多 512 个字符；为 `null` 时歌词行留空 |
-| `addControl(control: MediaControl)` | 显示的播放按键；未加入的按键显示为不可用 |
+| `addControl(control: MediaControl)` | 仅加入应用实际支持的播放操作；未加入的按键不可操作 |
 | `setSeekable(seekable: Boolean)` | 进度条可拖动，松手位置由 `onSeek` 交给应用。须先设置播放进度 |
 | `build(): MediaCard` | 可拖动但未设置播放进度时抛出 `IllegalArgumentException` |
 
@@ -433,7 +433,7 @@ sealed class IslandCard { abstract val title: String }
 | 方法 | 说明 |
 |---|---|
 | `setAvatar(avatar: IslandImage?)` | 头像 |
-| `setReplyEnabled(enabled: Boolean)` | 显示回复输入框，用户发送的文字由 `onReply` 交给应用；锁屏时不显示输入框 |
+| `setReplyEnabled(enabled: Boolean)` | 显示回复输入框，用户发送的文字由 `onReply` 交给应用；锁屏时不显示输入框。编辑或发送期间，新消息不替换当前回复卡片；未交给应用的文字保留为草稿 |
 | `addButton` / `setButtons` | 可用 `TextButton`、`BarIconButton`、`ToggleButton` |
 | `build(): MessageCard` | 使用了圆形图标按钮，或按钮超出上限时抛出 `IllegalArgumentException` |
 
@@ -536,7 +536,7 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 | 阶段名 | 2 至 16 个 |
 | 位图 | 宽高 1 至 2048 像素，占用内存不超过 8 MB |
 | 播放速度 | -16 至 16 |
-| 同时显示的内容 | 每个应用 3 条 |
+| SDK 内容数量 | 每个应用 3 条，排队内容也计入；星河岛自行读取的同应用通知与音乐不占用此名额 |
 | 提交频率 | 每个应用每秒 10 次（`start`、`update`、`end` 均计入） |
 | 自动展开 | 每个应用 10 秒内 1 次 |
 | 显示时长 | 由应用结束的内容最长 8 小时 |
@@ -544,6 +544,11 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 字符数按 UTF-16 计。
 
 ## 6. 显示规则
+
+- **通信版本**：接入库和星流必须使用通信版本 7；低于或高于 7 的版本均不建立连接。
+- **内容名额**：每个应用最多保留 3 条通过 SDK 提交的内容，包括暂未显示的排队内容；星河岛自行读取的同应用通知与音乐不占用此名额。
+- **连续更新**：同一事项连续更新时显示最新内容，期间提出的自动展开要求保留一次，仍受每个应用 10 秒内最多一次的限制。
+- **回复保护**：编辑或发送回复期间，新消息不替换正在回复的卡片。回复只交给对应内容的发送应用；未交出的文字保留为草稿。
 
 - **前台**：用户开启「进入对应应用时隐藏」（默认开启）时，本应用在前台期间，它的内容不在主岛和副岛上显示，离开应用后立即恢复；用户关闭此项后，内容在本应用内照常显示。应用不能更改此行为。
 - **排位**：外部应用的内容最高与未到点的计时同档，排在来电、通话、刚到的新消息和导航之后。消息卡片按新消息排位，刚送达时优先显示在主岛，停留一段时间后让位。
@@ -632,4 +637,4 @@ fun showFocusTimer(client: IslandClient, endAtMillis: Long): IslandResult {
 
 ## 8. 示例工程
 
-`astraisland-sdk-sample-0.1.0.zip` 为完整的 Android 示例工程：将工具包放入 `app/libs` 后即可构建。示例逐一显示九种卡片，演示各类按钮、收尾、回复、拖动进度、划走与结束回调，并附 Java 调用示例 `JavaExample.java`。
+`astraisland-sdk-sample-0.1.1.zip` 为完整的 Android 示例工程：将工具包放入 `app/libs` 后即可构建。示例逐一显示九种卡片，演示各类按钮、收尾、回复、拖动进度、划走与结束回调，并附 Java 调用示例 `JavaExample.java`。

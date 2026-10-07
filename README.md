@@ -2,7 +2,7 @@
 
 星河岛在手机前置摄像头周围显示进行中的事项。应用通过星河岛 SDK 提供内容，排版、动效与显示规则由星河岛统一完成。
 
-当前版本 **0.1.0**（公开测试，通信版本 7）。完整的产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
+当前版本 **0.1.1**（公开测试，通信版本 7）。完整的产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
 
 ## 使用条件
 
@@ -13,12 +13,12 @@
 
 ## 开始接入
 
-1. 下载 `sdk/astraisland-sdk-0.1.0.aar`（可用 `SHA256SUMS` 校验），放入应用模块的 `libs` 目录。
+1. 下载 `sdk/astraisland-sdk-0.1.1.aar`（可用 `SHA256SUMS` 校验），放入应用模块的 `libs` 目录。
 2. 在应用模块的 `build.gradle.kts` 中加入：
 
    ```kotlin
    dependencies {
-       implementation(files("libs/astraisland-sdk-0.1.0.aar"))
+       implementation(files("libs/astraisland-sdk-0.1.1.aar"))
    }
    ```
 

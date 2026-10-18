@@ -114,7 +114,7 @@ abstract class IslandCallback
 | `open fun onAction(activityId: String, actionId: String)` | 用户点击了卡片上的按钮。`actionId` 为应用设置的按钮编号，或 `TimerControl.actionId`、`MediaControl.actionId`、`StatusCard.ACTION_STOP` |
 | `open fun onReply(activityId: String, text: String)` | 用户在消息卡片的回复输入框中发送了文字。星河岛交出文字后卡片提示「已交给应用发送」；实际发送由应用负责，发送后可用同一内容编号更新卡片 |
 | `open fun onSeek(activityId: String, positionMs: Long)` | 用户在音乐卡片上拖动进度条并松手，`positionMs` 为毫秒。跳到该位置后，请用同一内容编号更新播放进度 |
-| `open fun onDismissed(activityId: String)` | 用户在胶囊上划动，把这条内容从星河岛上收起。内容并未结束：有新的提醒（`setAlertOnUpdate(true)` 且内容变化）、用户进出一次本应用，或用户点击摄像头区域召回时，它会重新显示；不再需要时请调用 `end()` |
+| `open fun onDismissed(activityId: String)` | 用户在胶囊上划动，把这条内容从星河岛上收起。内容并未结束：有真实的新消息或新的重要提醒、用户进出一次本应用，或用户点击摄像头区域召回时，它会重新显示；普通进度刷新、换歌词等重复更新不视为新的提醒。用户开启「长时间未操作时收起」或「停留后收起」后，星河岛也会在设定时间内没有操作时自动收起内容，此情形不调用本方法。不再需要时请调用 `end()` |
 | `open fun onExpanded(activityId: String)` | 用户展开了这条内容的卡片 |
 | `open fun onCollapsed(activityId: String)` | 这条内容的卡片收起 |
 | `open fun onEnded(activityId: String, reason: EndReason)` | 这条内容被星河岛结束 |
@@ -166,7 +166,7 @@ class IslandActivity.Builder(id: String, capsule: Capsule, card: IslandCard)
 | `setLockScreenVisibility(visibility: LockScreenVisibility)` | `PUBLIC` | 锁屏时显示多少 |
 | `setOpenIntent(intent: PendingIntent?)` | `null` | 点击卡片时执行的操作 |
 | `setOwnNotification(id: Int, tag: String? = null)` | 未设置 | 说明这条内容对应本应用自己的哪一条通知（`NotificationManager.notify` 的编号与标签）。这条内容在星河岛上时，那条通知不再单独显示在星河岛上；内容显示在主岛或副岛上，且用户开启「屏蔽系统横幅」时，那条通知也不再弹出系统横幅。仅可关联星河岛所在用户中本应用自己的通知；内容结束后不重新显示旧通知，待通知下次更新时按通知规则处理 |
-| `setPostedAt(timeMillis: Long)` | 未设置 | 发送时间（`System.currentTimeMillis()` 口径，大于 0）。设置后卡片来源栏右侧显示「刚刚」「5 分钟前」或具体时刻；消息卡片以发送时间区分新消息 |
+| `setPostedAt(timeMillis: Long)` | 未设置 | 发送时间（`System.currentTimeMillis()` 口径，大于 0）。显示来源栏时，卡片来源栏右侧显示「刚刚」「5 分钟前」或具体时刻；消息卡片以发送时间区分新消息 |
 | `setStaleAt(timeMillis: Long)` | 未设置 | 过时时间（大于 0）。过了这个时间卡片注明「信息可能已过时」，内容仍保留 |
 | `setDismissPolicy(policy: DismissPolicy)` | `untilEnded()` | 消失方式 |
 | `setLandscapeText(text: String?)` | `null` | 横屏胶囊的完整短文字，最多 32 个字符，数字与英文按组竖排后须在四行以内；未设置或无法完整显示时，星河岛保留完整数值或短状态，不截取卡片标题。消息显示应用名称；音乐优先显示波形；空白及非文字的右侧内容保持原有形式 |
@@ -267,7 +267,7 @@ class IslandImage
 
 位图须满足：未被回收；宽和高均在 1 至 2048 像素之间；占用内存（`Bitmap.getAllocationByteCount()`）不超过 8 MB（8388608 字节）。不满足时 `picture`、`glyph` 抛出 `IllegalArgumentException`。
 
-卡片上的图片（卡片左图、头像、标题小图、进度小图、对称标志）不接受 `appIcon()`：卡片顶部的来源栏已显示应用图标与名称。
+卡片上的图片（卡片左图、头像、标题小图、进度小图、对称标志）不接受 `appIcon()`：显示来源栏时，来源栏已显示应用图标与名称；用户关闭「显示应用来源」且卡片没有内容图片时，星河岛在卡片左侧显示应用图标。
 
 `enum class BuiltinSymbol`：`MUSIC`（音乐）、`TIMER`（计时器）、`ALARM`（闹钟）、`BATTERY`（电池）、`BOLT`（闪电）、`HEADPHONES`（耳机）、`BLUETOOTH`（蓝牙）、`MESSAGE`（消息）、`CHECK`（对勾）、`CLOSE`（叉号）、`PLAY`（播放）、`PAUSE`（暂停）、`SKIP_NEXT`（下一首）、`SKIP_PREV`（上一首）、`NAVIGATION`（方向箭头）、`HOURGLASS`（沙漏）、`INFO`（提示）、`DOWNLOAD`（下载）。
 
@@ -281,7 +281,7 @@ sealed class IslandCard { abstract val title: String }
 
 所有卡片的共同规则：
 
-- 卡片顶部由星河岛写上来源栏：本应用的图标与名称（名称取自系统，应用无法修改）；设置了发送时间时在来源栏右侧写出时间。
+- 用户开启「显示应用来源」时，卡片顶部由星河岛写上来源栏：本应用的图标与名称（名称取自系统，应用无法修改）；设置了发送时间时在来源栏右侧写出时间。该开关位于星流「显示规则」页，默认关闭；关闭后不显示来源栏，卡片左侧没有内容图片时改为显示应用图标。
 - 卡片左侧的图片只放内容自己的图片（头像、封面、商品图、符号），不接受应用图标。
 - 文字长度按 UTF-16 字符计：标题最多 128 个字符，说明最多 256 个字符，正文最多 4096 个字符，其余短文字最多 32 个字符。必填文字不能为空白。
 - 所有 `setXxx` 方法传入 `null` 表示不显示该项。
@@ -555,7 +555,8 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 - **排位**：外部应用的内容最高与未到点的计时同档，排在来电、通话、刚到的新消息和导航之后。消息卡片按新消息排位，刚送达时优先显示在主岛，停留一段时间后让位。
 - **内容种类**：音乐卡片属于「音乐」，消息卡片属于「消息」，强调卡片中的计时属于「计时」，其余卡片属于「实时活动」。用户在星流中关闭「星河岛歌词」后，音乐卡片的提交返回 `KIND_DISABLED`；其余种类不受星流的内容开关影响，只由「外部应用」页按应用管理。
 - **外部应用**：用户可在星流「外部应用」页关闭某个应用的内容；关闭后提交返回 `SOURCE_DISABLED`，已显示的内容被结束（`onEnded` 原因为 `REMOVED`）。
-- **收起与召回**：用户在胶囊上划动可把内容从星河岛上收起，应用收到 `onDismissed`，内容仍然保留，见 4.2。
+- **显示应用来源**：用户可在星流「显示规则」页关闭「显示应用来源」，该开关默认关闭。关闭后卡片不显示来源栏；卡片左侧没有内容图片时显示应用图标。
+- **收起与召回**：用户在胶囊上划动可把内容从星河岛上收起，应用收到 `onDismissed`，内容仍然保留，见 4.2。用户开启「长时间未操作时收起」或「停留后收起」时，星河岛也会在设定时间内没有操作时自动收起内容；此情形不调用 `onDismissed`。
 - **锁屏**：见 `LockScreenVisibility`。
 - **自己的通知**：仅关联当前用户中本应用自己的通知；对应内容保留期间，该通知不单独上岛。只有内容显示在主岛或副岛且开启「屏蔽系统横幅」时才屏蔽横幅。内容结束后，通知下次更新时再按通知规则处理。
 - **横屏**：胶囊纵向显示，数字与英文按组排列，保留完整数值、单位或短状态，不截取卡片标题。应用可用 `setLandscapeText` 提供可在四行内完整显示的短文字；消息显示来源应用名称，音乐优先显示波形。空白、图像、计时与进度环不由该文字替换，胶囊最右端的附加图像或进度环在横屏隐藏。

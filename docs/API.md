@@ -1,15 +1,15 @@
-# 星河岛 SDK 0.1.1 接口说明
+# 星河岛 SDK 0.1.2 接口说明
 
-本文列出星河岛 SDK 0.1.1 的全部公开接口、取值范围、异常与回调，内容与工具包代码一致。
+本文列出星河岛 SDK 0.1.2 的全部公开接口、取值范围、异常与回调，内容与工具包代码一致。
 
 ## 1. 概述
 
 | 项目 | 内容 |
 |---|---|
 | 名称 | 星河岛 SDK |
-| 版本 | 0.1.1 |
+| 版本 | 0.1.2 |
 | 通信版本 | 7 |
-| 工具包文件 | `astraisland-sdk-0.1.1.aar` |
+| 工具包文件 | `astraisland-sdk-0.1.2.aar` |
 | 公开接口所在包 | `com.astraisland.sdk` |
 | 接入应用最低系统版本 | Android 8.0（API 26） |
 | 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流。OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」，星河岛方可显示 |
@@ -23,12 +23,12 @@
 
 ## 2. 接入步骤
 
-1. 将 `astraisland-sdk-0.1.1.aar` 放入应用模块的 `libs` 目录。
+1. 将 `astraisland-sdk-0.1.2.aar` 放入应用模块的 `libs` 目录。
 2. 在应用模块的 `build.gradle.kts` 中添加依赖：
 
 ```kotlin
 dependencies {
-    implementation(files("libs/astraisland-sdk-0.1.1.aar"))
+    implementation(files("libs/astraisland-sdk-0.1.2.aar"))
 }
 ```
 
@@ -90,7 +90,7 @@ class IslandClient(context: Context)
 | `fun end(id: String, outro: Outro? = null): IslandResult` | 结束一条内容，可带收尾 |
 | `fun endAll(): IslandResult` | 结束本应用在星河岛上的全部内容；未连接时返回 `NOT_CONNECTED` |
 | `fun listMine(): List<String>` | 本应用仍在星河岛上的内容编号（含暂未显示、排在后面的内容）；未连接时为空列表 |
-| `const val SDK_VERSION: String = "0.1.1"` | 伴生常量 |
+| `const val SDK_VERSION: String = "0.1.2"` | 伴生常量 |
 | `const val PROTOCOL_VERSION: Int = 7` | 伴生常量 |
 
 | `State` 取值 | 含义 |
@@ -467,7 +467,7 @@ sealed class IslandButton(val id: String, val requiresUnlock: Boolean)
 
 | 类 | 构造方法 | 说明 |
 |---|---|---|
-| `TextButton` | `TextButton(id: String, label: String, style: ButtonStyle = NORMAL, icon: IslandImage? = null, fillColor: Int? = null, requiresUnlock: Boolean = false)` | 文字按钮，可在文字前带小图标。排在卡片底部，每排两个，最多两排。`label` 最多 32 个字符。`fillColor` 为自定义底色（ARGB），仅 `NORMAL` 样式可用：不透明度过半为实心底，否则为浅色底；白色、完全透明或在深色卡片上看不清的深色按普通灰色底显示 |
+| `TextButton` | `TextButton(id: String, label: String, style: ButtonStyle = NORMAL, icon: IslandImage? = null, fillColor: Int? = null, requiresUnlock: Boolean = false)` | 文字按钮，可在文字前带小图标。排在卡片底部，默认每排三个、最多四个，排法见「按钮排法」。`label` 最多 32 个字符。`fillColor` 为自定义底色（ARGB），仅 `NORMAL` 样式可用：不透明度过半为实心底，否则为浅色底；白色、完全透明或在深色卡片上看不清的深色按普通灰色底显示 |
 | `IconButton` | `IconButton(id: String, icon: IslandImage, description: String, requiresUnlock: Boolean = false)` | 圆形图标按钮，显示在卡片第一行右侧，灰色圆形底。`description` 为读屏说明，最多 32 个字符 |
 | `BarIconButton` | `BarIconButton(id: String, icon: IslandImage, description: String, requiresUnlock: Boolean = false)` | 底部图标按钮：只有图标、没有文字，在卡片底部另起一排并列显示。`description` 最多 32 个字符 |
 | `ToggleButton` | `ToggleButton(id: String, label: String, checked: Boolean, icon: IslandImage? = null, requiresUnlock: Boolean = false)` | 开关按钮：在卡片底部并排成一排，打开时以强调色显示。点击后星河岛不会自行切换状态，请在 `onAction` 中处理后用同一内容编号更新 `checked` |
@@ -513,7 +513,41 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 | 音乐 | 不可用 | 不可用 | 不可用 | 不可用 | `MediaControl` |
 | 对称 | 不可用 | 不可用 | 不可用 | 不可用 | 无 |
 
-按钮的具体位置由星河岛按卡片排布决定：例如只有一个文字按钮且第一行右侧空闲时，它显示为第一行右侧的小按钮。
+按钮的具体位置由星河岛按卡片排布决定：例如只有一个文字按钮且第一行右侧空闲时，它显示为第一行右侧的小按钮。底部文字按钮的排法可用 `setButtonLayout` 调整，见「按钮排法」。
+
+### 4.9 按钮排法
+
+底部带字的按钮默认每排 3 个、各占三分之一；4 个时平均分两排、各两个；一排里只剩 1 个时占半排居中。可用卡片构建器的 `setButtonLayout` 按卡修改，不设置时按默认排法。
+
+```kotlin
+class ButtonLayout @JvmOverloads constructor(
+    val perRow: Int = 3,
+    val rowFill: RowFill = RowFill.EQUAL,
+    val loneFill: LoneFill = LoneFill.HALF,
+    val loneAlign: LoneAlign = LoneAlign.CENTER,
+)
+```
+
+| 参数 | 取值 | 说明 |
+|---|---|---|
+| `perRow` | 1 至 4 | 一排最多几个文字按钮；超出范围时构造方法抛出 `IllegalArgumentException` |
+| `rowFill` | `EQUAL`（默认）、`WEIGHT`、`CONTENT` | 一排里按钮的宽度怎么分：等分；带底色的按钮（`PRIMARY` 或设置了 `fillColor` 的文字按钮）占两份宽，其余平分剩下的宽度；按文字长短排 |
+| `loneFill` | `HALF`（默认）、`FULL`、`CONTENT` | 一排里只剩一个按钮时占多宽：半排、整排、按文字长短 |
+| `loneAlign` | `START`、`CENTER`（默认）、`END` | 只剩一个按钮时靠左、居中、靠右；`loneFill = FULL` 时不生效 |
+
+```kotlin
+GenericCard.Builder("停车计费")
+    .addButton(TextButton("pay", "缴费", ButtonStyle.PRIMARY))
+    .addButton(TextButton("later", "稍后"))
+    .addButton(TextButton("detail", "详情"))
+    .setButtonLayout(ButtonLayout(perRow = 3))
+    .build()
+```
+
+- 有底部文字按钮的卡片（通用、进度、强调、明细、状态、大图、消息）都可以设置；音乐与对称卡片没有文字按钮。
+- 只影响底部排开的文字按钮。圆形按钮、底部图标按钮（一排最多 4 个）与开关（单独一排）不按这套排法。
+- 四个是文字按钮的总数上限；每排个数大于按钮总数时按实际数量排。
+- 设置只在 0.1.2 及以上的星河岛生效；旧版星河岛读不到这项设置，仍按每排两个排，不会报错。
 
 ## 5. 限制汇总
 
@@ -547,6 +581,7 @@ enum class MediaControl(val actionId: String) { PREVIOUS("prev"), PLAY_PAUSE("pl
 ## 6. 显示规则
 
 - **通信版本**：接入库和星流必须使用通信版本 7；低于或高于 7 的版本均不建立连接。
+- **按钮排法**：底部文字按钮默认每排三个、各占三分之一，四个时平均分两排，一排里只剩一个时占半排居中。接入应用可用 `setButtonLayout` 按卡修改每排 1 至 4 个、一排里按钮的分宽方式、只剩一个时占半排或整排及靠左居中或靠右；设置只在 0.1.2 及以上的星河岛生效。圆形按钮、底部图标按钮与开关不受影响。
 - **内容名额**：每个应用最多保留 3 条通过 SDK 提交的内容，包括暂未显示的排队内容；星河岛自行读取的同应用通知与音乐不占用此名额。
 - **连续更新**：同一事项连续更新时显示最新内容，期间提出的自动展开要求保留一次，仍受每个应用 10 秒内最多一次的限制。
 - **回复保护**：编辑或发送回复期间，新消息不替换正在回复的卡片。回复只交给对应内容的发送应用；未交出的文字保留为草稿。
@@ -678,4 +713,4 @@ fun showFocusTimer(client: IslandClient, endAtMillis: Long): IslandResult {
 
 ## 8. 示例工程
 
-`astraisland-sdk-sample-0.1.1.zip` 为完整的 Android 示例工程：将工具包放入 `app/libs` 后即可构建。示例逐一显示九种卡片，演示各类按钮、收尾、回复、拖动进度、划走与结束回调，并附 Java 调用示例 `JavaExample.java`。
+`astraisland-sdk-sample-0.1.2.zip` 为完整的 Android 示例工程：将工具包放入 `app/libs` 后即可构建。示例逐一显示九种卡片，演示各类按钮、收尾、回复、拖动进度、划走与结束回调，并附 Java 调用示例 `JavaExample.java`。

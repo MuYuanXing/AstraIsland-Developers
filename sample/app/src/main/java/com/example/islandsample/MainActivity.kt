@@ -12,6 +12,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.astraisland.sdk.BarIconButton
 import com.astraisland.sdk.BuiltinSymbol
+import com.astraisland.sdk.ButtonLayout
 import com.astraisland.sdk.ButtonStyle
 import com.astraisland.sdk.Capsule
 import com.astraisland.sdk.CapsuleTail
@@ -183,7 +184,10 @@ class MainActivity : Activity() {
         .setTag(CardTag("计时中"))
         .addButton(TextButton("pay", "缴费", ButtonStyle.PRIMARY))
         .addButton(TextButton("later", "稍后", fillColor = 0x660A84FF))
+        .addButton(TextButton("detail", "详情"))
         .addButton(ToggleButton("subtitles", "提醒", subtitlesOn))
+        // 三个文字按钮排一行；也可按卡调整每排个数、分宽与落单位置。
+        .setButtonLayout(ButtonLayout(perRow = 3))
         .build()
 
     private fun progress(fraction: Float): IslandCard = ProgressCard.Builder("预计 12:30 送达")

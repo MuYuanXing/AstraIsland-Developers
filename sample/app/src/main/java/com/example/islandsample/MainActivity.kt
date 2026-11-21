@@ -58,6 +58,7 @@ class MainActivity : Activity() {
     private lateinit var log: TextView
     private val worker = Executors.newSingleThreadExecutor()
     private var subtitlesOn = false
+    private var songSession: android.media.session.MediaSession? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +70,22 @@ class MainActivity : Activity() {
         column.addView(log)
         fun button(label: String, action: () -> Unit) = column.addView(Button(this).apply { text = label; setOnClickListener { action() } })
         button("连接星河岛") { client.connect() }
+        button("开始或结束歌曲供词演示") {
+            val previous = songSession
+            if (previous != null) {
+                previous.release()
+                songSession = null
+                append("歌曲演示已结束")
+            } else {
+                songSession = android.media.session.MediaSession(this, "IslandSong").also { session ->
+                    ApiExamples.publishSong(session, android.media.MediaMetadata.Builder().build())
+                    session.setPlaybackState(android.media.session.PlaybackState.Builder()
+                        .setState(android.media.session.PlaybackState.STATE_PLAYING, 0L, 1f).build())
+                    session.isActive = true
+                }
+                append("正在演示《沿河散步》的歌词时间轴，首句在 3.5 秒出现。")
+            }
+        }
         button("通用卡片") { show("generic", generic()) }
         button("进度卡片") { show("progress", progress(0.45f), progressCapsule(0.45f)) }
         button("强调卡片（取件码）") { show("code", emphasisCode()) }
@@ -90,6 +107,7 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        songSession?.release()
         client.disconnect()
         worker.shutdown()
         super.onDestroy()

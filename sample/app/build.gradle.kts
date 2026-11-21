@@ -26,6 +26,5 @@ android {
 }
 
 dependencies {
-    // 星河岛 SDK：将 astraisland-sdk-0.1.2.aar 放入 app/libs 目录。
-    implementation(files("libs/astraisland-sdk-0.1.2.aar"))
+    implementation(files("libs/astraisland-sdk-0.1.3.aar"))
 }

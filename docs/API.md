@@ -1,18 +1,18 @@
-# 星河岛 SDK 0.1.2 接口说明
+# 星河岛 SDK 0.1.3 接口说明
 
-本文列出星河岛 SDK 0.1.2 的全部公开接口、取值范围、异常与回调，内容与工具包代码一致。
+本文列出星河岛 SDK 0.1.3 的公开接口、取值范围、异常与回调。
 
 ## 1. 概述
 
 | 项目 | 内容 |
 |---|---|
 | 名称 | 星河岛 SDK |
-| 版本 | 0.1.2 |
+| 版本 | 0.1.3 |
 | 通信版本 | 7 |
-| 工具包文件 | `astraisland-sdk-0.1.2.aar` |
+| 工具包文件 | `astraisland-sdk-0.1.3.aar` |
 | 公开接口所在包 | `com.astraisland.sdk` |
 | 接入应用最低系统版本 | Android 8.0（API 26） |
-| 宿主 | 星流（包名 `com.astraflow.tool`），需 Android 15（API 35）及以上，并已启用星河岛；仅支持通信版本 7 的星流。OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」，星河岛方可显示 |
+| 宿主 | Android 15（API 35）及以上，已启用星流 `com.astraflow.tool` 和星河岛。外部卡片使用通信版本 7。ColorOS 系统流体云已内置于星流。 |
 | 编译要求 | compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.1 及以上 |
 | 依赖 | 仅 Kotlin 标准库。Kotlin 工程已自带；纯 Java 工程需添加 `implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")` |
 | 混淆 | 无需额外混淆规则 |
@@ -23,12 +23,12 @@
 
 ## 2. 接入步骤
 
-1. 将 `astraisland-sdk-0.1.2.aar` 放入应用模块的 `libs` 目录。
+1. 将 `astraisland-sdk-0.1.3.aar` 放入应用模块的 `libs` 目录。
 2. 在应用模块的 `build.gradle.kts` 中添加依赖：
 
 ```kotlin
 dependencies {
-    implementation(files("libs/astraisland-sdk-0.1.2.aar"))
+    implementation(files("libs/astraisland-sdk-0.1.3.aar"))
 }
 ```
 
@@ -90,13 +90,13 @@ class IslandClient(context: Context)
 | `fun end(id: String, outro: Outro? = null): IslandResult` | 结束一条内容，可带收尾 |
 | `fun endAll(): IslandResult` | 结束本应用在星河岛上的全部内容；未连接时返回 `NOT_CONNECTED` |
 | `fun listMine(): List<String>` | 本应用仍在星河岛上的内容编号（含暂未显示、排在后面的内容）；未连接时为空列表 |
-| `const val SDK_VERSION: String = "0.1.2"` | 伴生常量 |
+| `const val SDK_VERSION: String = "0.1.3"` | 伴生常量 |
 | `const val PROTOCOL_VERSION: Int = 7` | 伴生常量 |
 
 | `State` 取值 | 含义 |
 |---|---|
 | `NOT_INSTALLED` | 未安装星流，或已安装的星流不支持当前通信版本 |
-| `WAITING` | 正在等待星河岛响应；连接后长时间停留在此状态，说明星河岛未启用或设备尚未就绪（OPPO、一加、realme 手机上也可能是尚未启用插件「流体云事件接入」） |
+| `WAITING` | 等待星河岛响应。请检查星河岛是否启用、系统界面作用域是否已经加载。 |
 | `REJECTED` | 星河岛拒绝了连接（例如身份核对未通过） |
 | `READY` | 已连接，可以显示内容 |
 
@@ -549,6 +549,34 @@ GenericCard.Builder("停车计费")
 - 四个是文字按钮的总数上限；每排个数大于按钮总数时按实际数量排。
 - 设置只在 0.1.2 及以上的星河岛生效；旧版星河岛读不到这项设置，仍按每排两个排，不会报错。
 
+### 4.10 IslandSong（播放器与歌词插件）
+
+`com.astraisland.sdk.IslandSong` 从 0.1.3 起提供。播放器开发者和插件作者在实际播放器进程中取得歌曲数据，将其写入正在播放的 Android `MediaSession`。用户打开星流的音乐显示、歌词与系统歌词来源后，星河岛跟随这个会话切歌、暂停和拖动。该入口沿用音乐与歌词的星尘资格。
+
+| 接口 | 填写方式 |
+| --- | --- |
+| `IslandSong.Builder(id, title)` | 必填稳定歌曲编号和歌名。同一录音保持相同编号，切换不同录音时更换编号。 |
+| `setArtist`、`setAlbum`、`setSongMid` | 歌手、专辑，以及播放器拥有的歌曲 mid。 |
+| `setDurationMs`、`setArtwork`、`setArtworkUri` | 时长用毫秒，封面可传 Bitmap 或系统界面可读取的 URI。原会话已有封面和时长时可以沿用。 |
+| `setLyrics(originalLrc, translatedLrc)` | 整首逐行 LRC，译文可省略。两条时间轴均使用从曲首起算的绝对时间。 |
+| `setEnhancedLyrics`、`setRomanization` | 提供增强逐字原文和罗马音。当前星河岛展示逐行原文与翻译。 |
+| `setNoLyrics()` | 已确认本曲没有歌词。歌词还在加载时，用新歌的身份构建并发布，歌词到达后再更新。 |
+| `build().applyTo(current)` | 复制当前 `MediaMetadata` 并补入歌曲字段和 `lyricInfo`。保留已有媒体编号与其他元数据。歌词 JSON 的 UTF-8 上限为 256 KiB。 |
+
+```kotlin
+val song = IslandSong.Builder("studio-001", "沿河散步")
+    .setArtist("示例乐队")
+    .setAlbum("星期六")
+    .setDurationMs(183000)
+    .setLyrics("[00:03.500]河岸亮起第一盏灯\n[00:08.000]脚步跟着晚风")
+    .build()
+session.setMetadata(song.applyTo(currentMetadata))
+```
+
+作者负责在播放器真实换曲和取词完成时发布。异步结果发布前请核对当前歌曲编号。播放、暂停、倍速、定位和停止沿用播放器已有的 `PlaybackState`、会话回调及控制按钮。普通进度变化只更新播放状态。插件已经挂接元数据写入点时，应提交 `applyTo` 的返回值，避免在同一回调中递归调用 `setMetadata`。
+
+插件可以在自己清单的 `<application>` 中声明 `<meta-data android:name="com.astraisland.sdk.SONG_PROVIDER" android:value="true" />`，供星流设置列出已安装的提供者。歌曲归属取自真实播放会话及 Android 用户。选择同一播放器的一个写入插件即可。
+
 ## 5. 限制汇总
 
 | 项目 | 上限 |
@@ -714,4 +742,4 @@ fun showFocusTimer(client: IslandClient, endAtMillis: Long): IslandResult {
 
 ## 8. 示例工程
 
-`astraisland-sdk-sample-0.1.2.zip` 为完整的 Android 示例工程：将工具包放入 `app/libs` 后即可构建。示例逐一显示九种卡片，演示各类按钮、收尾、回复、拖动进度、划走与结束回调，并附 Java 调用示例 `JavaExample.java`。
+示例工程包含工具包、九种卡片及 Java 调用示例。播放器与插件的歌曲发布示例位于 `ApiExamples.publishSong`。

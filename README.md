@@ -2,7 +2,7 @@
 
 星河岛在手机前置摄像头周围显示进行中的事项。应用通过星河岛 SDK 提供内容，排版、动效与显示规则由星河岛统一完成。
 
-当前版本 **0.1.2**（公开测试，通信版本 7）。完整的产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
+当前版本 **0.1.3**（公开测试，通信版本 7）。播放器与歌词插件可使用 `IslandSong` 向实际播放会话提供整首歌曲。产品介绍、设计规范与接入说明见 [星河岛开发者平台](https://astraflow.cc/island/)。
 
 工具包版本与文档修订分别记录，当前说明与展示资料见 [更新日志](CHANGELOG.md)。
 
@@ -11,16 +11,16 @@
 | 项目 | 要求 |
 | --- | --- |
 | 接入应用 | Android 8.0（API 26）及以上；compileSdk 26 及以上；Java 17；Kotlin 工程需 Kotlin 2.1 及以上 |
-| 用户设备 | Android 15 及以上，已安装并启用支持通信版本 7 的星流；OPPO、一加、realme 手机上还需安装并启用星流官方插件「流体云事件接入」 |
+| 用户设备 | Android 15 及以上，已安装并启用星流和星河岛。ColorOS 系统流体云已内置于星流。 |
 
 ## 开始接入
 
-1. 下载 `sdk/astraisland-sdk-0.1.2.aar`（可用 `SHA256SUMS` 校验），放入应用模块的 `libs` 目录。
+1. 下载 `sdk/astraisland-sdk-0.1.3.aar`（可用 `SHA256SUMS` 校验），放入应用模块的 `libs` 目录。
 2. 在应用模块的 `build.gradle.kts` 中加入：
 
    ```kotlin
    dependencies {
-       implementation(files("libs/astraisland-sdk-0.1.2.aar"))
+       implementation(files("libs/astraisland-sdk-0.1.3.aar"))
    }
    ```
 

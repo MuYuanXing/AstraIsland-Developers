@@ -18,6 +18,15 @@ import com.astraisland.sdk.TimerControl
 
 /** 接口说明中的三个示例。请在后台线程调用。 */
 object ApiExamples {
+    fun publishSong(session: android.media.session.MediaSession, current: android.media.MediaMetadata) {
+        val song = com.astraisland.sdk.IslandSong.Builder("studio-001", "沿河散步")
+            .setArtist("示例乐队")
+            .setAlbum("星期六")
+            .setDurationMs(183000)
+            .setLyrics("[00:03.500]河岸亮起第一盏灯\n[00:08.000]脚步跟着晚风")
+            .build()
+        session.setMetadata(song.applyTo(current))
+    }
 
     /** 示例一：下载进度。 */
     fun showDownload(client: IslandClient, percent: Int): IslandResult {
